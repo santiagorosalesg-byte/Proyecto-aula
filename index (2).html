@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>INSTITUTO POLITECNICO NACIONAL - CECyT 11 WM 1IM1</title>
+  <style>
+    /* Mobile-first styling */
+    :root{font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+    html,body{height:100%;margin:0;background:#f7f9fb;color:#082032}
+    .container{max-width:420px;margin:0 auto;padding:16px}
+    header{background:#0b5f65;color:white;padding:14px;border-radius:12px;text-align:center}
+    h1{font-size:18px;margin:0.2rem 0}
+    h2{font-size:16px;margin:12px 0}
+    p{line-height:1.4;font-size:14px}
+    .card{background:white;padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(6,24,40,0.08);margin:12px 0}
+    label{display:block;font-weight:600;margin-bottom:6px}
+    input[type=text], input[type=number], textarea, select{width:100%;padding:10px;border-radius:8px;border:1px solid #dbe6ea;font-size:14px}
+    button{width:100%;padding:12px;border-radius:10px;border:0;background:#0b5f65;color:white;font-weight:700;margin:8px 0}
+    .small{font-size:13px;color:#445662}
+    nav{display:flex;gap:8px;margin:10px 0}
+    nav button{flex:1;padding:10px}
+    /* Mobile-only message for larger screens */
+    @media(min-width:700px){
+      body>*:not(.desktop-warning){display:none}
+      .desktop-warning{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px}
+      .desktop-warning .box{max-width:600px;background:white;padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(6,24,40,0.08);}
+    }
+    /* Simple styles for game canvas */
+    #gameArea{position:relative;height:360px;background:linear-gradient(#e6f7f7,#fff);overflow:hidden;border-radius:12px}
+    .phone{position:absolute;width:56px;height:40px;border-radius:8px;background:#0b5f65;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 6px 12px rgba(4,20,24,0.12);touch-action:manipulation}
+    .info-row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+    .tiny{font-size:12px}
+    .crossword-grid{display:grid;grid-template-columns:repeat(11,30px);gap:2px}
+    .cell{width:30px;height:30px;border-radius:4px;border:1px solid #cfdde0;display:flex;align-items:center;justify-content:center}
+    .cell input{width:100%;height:100%;border:0;text-align:center;font-weight:700;font-size:14px;outline:none;text-transform:lowercase}
+    .hidden{display:none}
+    .center{text-align:center}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>INSTITUTO POLITECNICO NACIONAL</h1>
+      <div class="small">CECyT 11 WM — 1IM1</div>
+    </header>
+
+    <div id="entry" class="card">
+      <h2>Registro</h2>
+      <p class="small">Por favor ingresa tu nombre y grupo para comenzar y participar en las actividades.</p>
+      <label>Nombre</label>
+      <input id="participantName" type="text" placeholder="Ej. Juan Perez" />
+      <label>Grupo</label>
+      <input id="participantGroup" type="text" placeholder="Ej. 1IM1-A" />
+      <button id="startBtn">Entrar y ver la información</button>
+    </div>
+
+    <div id="main" class="hidden">
+      <div class="card">
+        <h2>Impacto del uso excesivo de dispositivos digitales</h2>
+        <p>El uso excesivo de teléfonos, tablets y computadoras puede afectar el bienestar emocional y el rendimiento académico de los adolescentes. Entre las consecuencias principales están: ansiedad, alteraciones del sueño, distracción en clase, baja concentración, y menor rendimiento en actividades escritas y orales.</p>
+        <h2>Relación con la materia: Expresión Oral y Escrita</h2>
+        <p>En Expresión Oral y Escrita estas consecuencias se manifiestan como:</p>
+        <ul>
+          <li>Menor fluidez y coherencia al hablar por falta de práctica en conversaciones presenciales.</li>
+          <li>Dificultad para estructurar ideas en escritos (vicios de redacción y falta de revisión).</li>
+          <li>Olvido de instrucciones y menor atención durante exposiciones orales.</li>
+        </ul>
+        <h2>Cómo mejorar</h2>
+        <p>Recomendaciones prácticas: establecer horarios sin pantallas antes de dormir, usar la técnica Pomodoro al estudiar, activar notificaciones silenciosas, practicar exposiciones en parejas sin dispositivos, y llevar un registro escrito de actividades diarias.</p>
+      </div>
+
+      <nav>
+        <button id="btnActivities">Actividades</button>
+        <button id="btnResults">Ver resultados (registro)</button>
+      </nav>
+
+      <div id="activities" class="card hidden">
+        <h2 class="center">Actividades interactivas</h2>
+        <p class="small center">Completa las actividades. Al acabar tus resultados se guardarán para verlos en la sección de resultados.</p>
+
+        <!-- 1: Catch the phones game -->
+        <section id="gameSection" class="card">
+          <h3>1) Juego: Atrapa celulares (1 minuto)</h3>
+          <p class="tiny">Dificultad: Difícil — la velocidad y frecuencia aumentan. Duración: 60 segundos.</p>
+          <div id="gameArea"></div>
+          <div class="info-row">
+            <div class="tiny">Puntos: <span id="score">0</span></div>
+            <div class="tiny">Tiempo: <span id="timer">60</span>s</div>
+          </div>
+          <button id="startGame">Iniciar juego</button>
+        </section>
+
+        <!-- 2: Crossword -->
+        <section id="crosswordSection" class="card">
+          <h3>2) Crucigrama</h3>
+          <p class="small">Llena las palabras relacionadas con el texto. Las letras deben ir en minúsculas.</p>
+          <div id="crossword" class="crossword-grid"></div>
+          <div style="margin-top:8px">
+            <button id="checkCrossword">Comprobar crucigrama</button>
+            <div id="crossResult" class="small"></div>
+          </div>
+          <div class="small" style="margin-top:8px">Pistas: 1. ansiedad, 2. insomnio, 3. distraccion, 4. redes, 5. fatiga</div>
+        </section>
+
+        <!-- 3: Cuestionario 20 preguntas -->
+        <section id="quizSection" class="card">
+          <h3>3) Cuestionario (20 preguntas)</h3>
+          <p class="small">Responde y obtén tu puntuación.</p>
+          <div id="quiz"></div>
+          <button id="submitQuiz">Enviar cuestionario</button>
+          <div id="quizScore" class="small"></div>
+        </section>
+
+        <!-- 4: Reto de escritura -->
+        <section id="writeSection" class="card">
+          <h3>4) Reto de escritura</h3>
+          <p class="small">Escribe cómo mejorarás tu uso de dispositivos (mínimo 50 caracteres).</p>
+          <textarea id="challengeText" rows="6" placeholder="Escribe aquí..."></textarea>
+          <button id="submitChallenge">Enviar reto</button>
+          <div id="challengeResult" class="small"></div>
+        </section>
+
+        <button id="saveAll">Guardar mis resultados</button>
+      </div>
+
+      <div id="resultsView" class="card hidden">
+        <h2>Registro de participantes</h2>
+        <p class="small">Aquí podrás ver los datos enviados (se guardan en tu dispositivo).</p>
+        <div id="participantsList" class="small"></div>
+        <button id="clearStorage">Borrar registros locales</button>
+      </div>
+    </div>
+
+    <div class="desktop-warning hidden">
+      <div class="box">
+        <h2>Esta página está optimizada para dispositivos móviles</h2>
+        <p>Para ver y usar las actividades interactivas, abre este archivo en un celular (o usa la vista móvil del navegador).</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Routing + Entry handling ---
+    const entry = document.getElementById('entry');
+    const main = document.getElementById('main');
+    const startBtn = document.getElementById('startBtn');
+    const nameInput = document.getElementById('participantName');
+    const groupInput = document.getElementById('participantGroup');
+    const btnActivities = document.getElementById('btnActivities');
+    const btnResults = document.getElementById('btnResults');
+    const activities = document.getElementById('activities');
+    const resultsView = document.getElementById('resultsView');
+    const participantsList = document.getElementById('participantsList');
+
+    let participant = {name:'',group:''};
+    startBtn.addEventListener('click', ()=>{
+      const name = nameInput.value.trim();
+      const group = groupInput.value.trim();
+      if(!name||!group){alert('Ingresa tu nombre y grupo.');return}
+      participant.name = name; participant.group = group;
+      entry.classList.add('hidden'); main.classList.remove('hidden'); activities.classList.remove('hidden');
+    });
+    btnActivities.addEventListener('click', ()=>{activities.classList.remove('hidden');resultsView.classList.add('hidden')});
+    btnResults.addEventListener('click', ()=>{activities.classList.add('hidden');resultsView.classList.remove('hidden');renderParticipants()});
+
+    // --- Storage helpers ---
+    function loadParticipants(){
+      try{const s=localStorage.getItem('participants');return s?JSON.parse(s):[];}catch(e){return[]}
+    }
+    function saveParticipants(arr){localStorage.setItem('participants',JSON.stringify(arr))}
+    function renderParticipants(){
+      const arr = loadParticipants();
+      if(arr.length===0){participantsList.innerHTML='<i>No hay registros.</i>';return}
+      let html = '<ol>' + arr.map(p=>`<li><b>${escapeHtml(p.name)}</b> (${escapeHtml(p.group)}) — Juego: ${p.gameScore} pts, Quiz: ${p.quizScore}/${p.quizTotal}, Crucigrama: ${p.crossCorrect}/${p.crossTotal}, Reto: ${p.challengeOK? 'Sí' : 'No'} <div class="tiny">${escapeHtml(p.time)}</div></li>`).join('') + '</ol>';
+      participantsList.innerHTML = html;
+    }
+    document.getElementById('clearStorage').addEventListener('click', ()=>{if(confirm('Borrar los registros locales?')){localStorage.removeItem('participants');renderParticipants()}});
+
+    // --- Game: Catch the phones ---
+    const gameArea = document.getElementById('gameArea');
+    const startGameBtn = document.getElementById('startGame');
+    const scoreSpan = document.getElementById('score');
+    const timerSpan = document.getElementById('timer');
+    let gameInterval=null, spawnInterval=null, remaining=60, score=0, speed=1.4;
+
+    function spawnPhone(){
+      const el = document.createElement('div');
+      el.className='phone'; el.textContent='📱';
+      const w = gameArea.clientWidth-60; const x = Math.max(4, Math.random()*w);
+      el.style.left = x+'px'; el.style.top = '-50px';
+      gameArea.appendChild(el);
+      let vy = 1.2*speed + Math.random()*0.6*speed; // fall speed
+      function step(){
+        const top = parseFloat(el.style.top);
+        if(isNaN(top)) return;
+        el.style.top = (top + vy) + 'px';
+        if(parseFloat(el.style.top) > gameArea.clientHeight){el.remove();return}
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+      // touch/click
+      el.addEventListener('pointerdown', ()=>{score+=10; scoreSpan.textContent=score; el.remove(); speed *= 1.03});
+      // increase speed gradually
+      speed *= 1.005;
+    }
+
+    function startGame(){
+      // reset
+      gameArea.innerHTML=''; score=0; remaining=60; speed=1.4; scoreSpan.textContent=0; timerSpan.textContent=remaining;
+      // spawn frequency initial
+      spawnInterval = setInterval(spawnPhone, 800);
+      // make spawn faster as time goes
+      let spawnSpeedAdjustment = setInterval(()=>{
+        clearInterval(spawnInterval);
+        const base = Math.max(220, 800 - (60-remaining)*9); // faster as time reduces
+        spawnInterval = setInterval(spawnPhone, base);
+      }, 1500);
+
+      gameInterval = setInterval(()=>{
+        remaining--; timerSpan.textContent = remaining;
+        if(remaining <= 0){
+          clearInterval(gameInterval); clearInterval(spawnInterval); clearInterval(spawnSpeedAdjustment);
+          // remove all phones
+          Array.from(document.querySelectorAll('.phone')).forEach(e=>e.remove());
+          alert('Tiempo terminado! Puntos: ' + score);
+        }
+      },1000);
+
+      // auto-stop safety at 62s
+      setTimeout(()=>{clearInterval(gameInterval); clearInterval(spawnInterval);}, 62000);
+    }
+    startGameBtn.addEventListener('click', startGame);
+
+    // --- Crossword: simple fixed grid and checking ---
+    // We'll make an 11x11 grid and place 5 words (simple layout)
+    const crosswordContainer = document.getElementById('crossword');
+    const words = [
+      {w:'ansiedad',r:0,c:0,dir:'ac'}, // across
+      {w:'insomnio',r:2,c:2,dir:'ac'},
+      {w:'distraccion',r:4,c:0,dir:'ac'},
+      {w:'redes',r:7,c:1,dir:'ac'},
+      {w:'fatiga',r:9,c:3,dir:'ac'}
+    ];
+    const rows=11, cols=11;
+    let grid = Array.from({length:rows},()=>Array(cols).fill(''));
+    // fill positions
+    words.forEach(obj=>{
+      const w = obj.w;
+      for(let i=0;i<w.length;i++){
+        const r = obj.r + (obj.dir==='vd'?i:0);
+        const c = obj.c + (obj.dir==='ac'?i:0);
+        grid[r][c] = grid[r][c] || '_';
+      }
+    });
+    // render
+    crosswordContainer.innerHTML='';
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const cell = document.createElement('div'); cell.className='cell';
+        if(grid[r][c] === ''){cell.style.background='#e9f2f2'}else{
+          const inp = document.createElement('input'); inp.maxLength=1; inp.dataset.r=r; inp.dataset.c=c; cell.appendChild(inp);
+        }
+        crosswordContainer.appendChild(cell);
+      }
+    }
+    document.getElementById('checkCrossword').addEventListener('click', ()=>{
+      let total=0, correct=0;
+      words.forEach(obj=>{total += obj.w.length; for(let i=0;i<obj.w.length;i++){const r=obj.r+(obj.dir==='vd'?i:0); const c=obj.c+(obj.dir==='ac'?i:0); const selector = `.cell input[data-r="${r}"][data-c="${c}"]`; const input = document.querySelector(selector); const val = input?input.value.trim().toLowerCase() : ''; if(val === obj.w[i]) correct++; }});
+      document.getElementById('crossResult').textContent = `Correctas: ${correct} / ${total}`;
+      // store cross result for later
+      window._crossResult = {correct, total};
+    });
+
+    // --- Quiz with 20 questions (simple multiple choice) ---
+    const quizEl = document.getElementById('quiz');
+    const quizQuestions = [
+      {q:'¿Cuál es una consecuencia del uso excesivo de dispositivos?', a:['Mejor sueño','Ansiedad','Mayor concentración'], correct:1},
+      {q:'¿Qué afecta directamente a Expresión Oral?', a:['Reducción de práctica en conversaciones presenciales','Aumento de la memoria','Mejor ortografía'], correct:0},
+      {q:'Una estrategia para mejorar el uso de dispositivos es:', a:['Notificaciones activas 24/7','Técnica Pomodoro','Usar el teléfono antes de dormir'], correct:1},
+      {q:'El insomnio puede ser causado por:', a:['Pantallas antes de dormir','Comer sano','Hacer ejercicio'], correct:0},
+      {q:'¿Qué reduce la atención en clase?', a:['Distracción por redes','Leer libros','Practicar exposiciones'], correct:0},
+      {q:'¿Qué producto es útil para anotar ideas?', a:['Registro escrito','Ver más videos','Jugar más'], correct:0},
+      {q:'¿Qué mejora la expresión escrita?', a:['Revisión y práctica','Ignorar correcciones','Usar memes en todo'], correct:0},
+      {q:'¿Qué provoca fatiga mental?', a:['Exceso de pantalla','Dormir 8 horas','Hacer pausas al estudiar'], correct:0},
+      {q:'Qué acción ayuda a dormir mejor?', a:['Apagar pantallas 1 hora antes','Usar el celular en la cama','Tener notificaciones activas'], correct:0},
+      {q:'¿Cómo mejora la exposición oral?', a:['Practicar sin dispositivos','Ver presentaciones ajenas todo el tiempo','No preparar el contenido'], correct:0},
+      {q:'¿Qué reduce las distracciones? ', a:['Modo no molestar','Usar más redes','Estudiar sin metas'], correct:0},
+      {q:'¿Cuál es una causa de baja puntuación académica?', a:['Multitarea digital constante','Planificar tiempos','Pedir ayuda'], correct:0},
+      {q:'¿Qué es útil para organizar tiempos de estudio?', a:['Pomodoro','Apagar alarmas','Hacer todo a la vez'], correct:0},
+      {q:'¿Qué ayuda a desarrollar coherencia en textos?', a:['Estructurar ideas','Ignorar el tema','Usar jerga excesiva'], correct:0},
+      {q:'¿Qué efecto tiene la exposición a redes sociales?', a:['Comparación social y ansiedad','Mayor concentración','Mejor sueño'], correct:0},
+      {q:'¿Qué es un vicio de la redacción?', a:['Repetición innecesaria','Revisar borradores','Usar conectores'], correct:0},
+      {q:'¿Qué reduce el rendimiento en exposiciones?', a:['Uso frecuente de dispositivos durante el estudio','Practicar en voz alta','Preparación previa'], correct:0},
+      {q:'¿Qué recomendamos para mejorar hábitos?', a:['Crear límites de tiempo para pantallas','Mantener pantalla encendida antes de dormir','Eliminar toda comunicación'], correct:0},
+      {q:'¿Qué puede ayudar a recuperar la atención?', a:['Pausas cortas y activas','Mirar más reels','Estudiar sin descanso'], correct:0},
+      {q:'¿Qué es clave para un buen rendimiento académico?', a:['Buena gestión del tiempo','Uso excesivo de dispositivos','Evitar dormir'], correct:0}
+    ];
+    function renderQuiz(){
+      quizEl.innerHTML='';
+      quizQuestions.forEach((item, idx)=>{
+        const wrap = document.createElement('div'); wrap.className='card';
+        const qh = document.createElement('div'); qh.innerHTML = `<b>${idx+1}.</b> ${item.q}`;
+        wrap.appendChild(qh);
+        item.a.forEach((opt,i)=>{
+          const id = `q${idx}_opt${i}`;
+          const label = document.createElement('label');
+          label.innerHTML = `<input type="radio" name="q${idx}" value="${i}" /> ${opt}`;
+          wrap.appendChild(label);
+        });
+        quizEl.appendChild(wrap);
+      });
+    }
+    renderQuiz();
+    document.getElementById('submitQuiz').addEventListener('click', ()=>{
+      let scoreQ=0; let answered=0;
+      quizQuestions.forEach((item, idx)=>{const sel = document.querySelector(`input[name=q${idx}]:checked`); if(sel){answered++; if(parseInt(sel.value) === item.correct) scoreQ++; }});
+      document.getElementById('quizScore').textContent = `Obtuviste ${scoreQ} de ${quizQuestions.length} (Contestadas: ${answered}).`;
+      window._quizResult = {score:scoreQ,total:quizQuestions.length};
+    });
+
+    // --- Challenge writing ---
+    document.getElementById('submitChallenge').addEventListener('click', ()=>{
+      const text = document.getElementById('challengeText').value.trim();
+      if(text.length < 50){document.getElementById('challengeResult').textContent = 'Escribe al menos 50 caracteres.'; return}
+      document.getElementById('challengeResult').textContent = 'Reto enviado. Buen trabajo!';
+      window._challengeText = text; window._challengeOK = true;
+    });
+
+    // --- Save all results to storage ---
+    document.getElementById('saveAll').addEventListener('click', ()=>{
+      const time = new Date().toLocaleString();
+      const gameScore = score || 0;
+      const quizRes = window._quizResult || {score:0,total:quizQuestions.length};
+      const crossRes = window._crossResult || {correct:0,total: words.reduce((s,w)=>s+w.w.length,0)};
+      const challengeOK = !!window._challengeOK;
+      const record = {
+        name: participant.name,
+        group: participant.group,
+        gameScore,
+        quizScore: quizRes.score,
+        quizTotal: quizRes.total,
+        crossCorrect: crossRes.correct,
+        crossTotal: crossRes.total,
+        challengeOK,
+        challengeText: window._challengeText || '',
+        time
+      };
+      const arr = loadParticipants(); arr.push(record); saveParticipants(arr);
+      alert('Resultados guardados localmente. Puedes verlos en Ver resultados.');
+    });
+
+    // util
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[ch])}
+
+    // init
+    document.addEventListener('visibilitychange', ()=>{if(document.hidden){/* pause if needed */}});
+
+    // bonus: show results view if URL has #results
+    if(location.hash === '#results'){entry.classList.add('hidden'); main.classList.remove('hidden'); activities.classList.add('hidden'); resultsView.classList.remove('hidden'); renderParticipants();}
+  </script>
+</body>
+</html>
